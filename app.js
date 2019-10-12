@@ -9,7 +9,7 @@ import {
 
 var camera, scene, renderer;
 
-var room;
+var room, geometry;
 
 var count = 0;
 var radius = 0.08;
@@ -21,12 +21,22 @@ var clock = new THREE.Clock();
 init();
 animate();
 
+function set_position(decoded) {
+	var polar = calculate_angle(decoded);
+	var object = room.children[0];
+	object.position.x = polar[0] * 10 * Math.cos(polar[1]);
+	object.position.z = -polar[0] * 10 * Math.sin(polar[1]);
+	object.position.y = 1;
+	console.log(object.position.x);
+	console.log(object.position.y);
+}
+
 function init() {
 
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color(0x505050);
 
-	camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10);
+	camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 20);
 
 	room = new THREE.LineSegments(
 		new BoxLineGeometry(6, 6, 6, 10, 10, 10),
@@ -46,9 +56,12 @@ function init() {
 		color: Math.random() * 0xffffff
 	}));
 	object.position.x = 0;
-	object.position.y = 1;
 	object.position.z = -3;
+	object.position.y = 1;
 	room.add(object);
+	var request = new AudioFileRequest('./resources/rocket_LR.wav');
+	request.onSuccess = set_position;
+	request.send();
 
 	//
 
@@ -66,7 +79,7 @@ function init() {
 
 	// helpers
 
-	var geometry = new THREE.BufferGeometry();
+	geometry = new THREE.BufferGeometry();
 	geometry.addAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, -1], 3));
 	geometry.addAttribute('color', new THREE.Float32BufferAttribute([0.5, 0.5, 0.5, 0, 0, 0], 3));
 
@@ -79,25 +92,31 @@ function init() {
 
 	window.addEventListener('resize', onWindowResize, false);
 
+	window.addEventListener('keydown', function(event) {
+		switch (event.code) {
+			case 'KeyL':
+				var object = room.children[Math.floor(Math.random() * (room.children.length))].clone();
+				object.position.x += Math.random() * (Math.random() > 0.5) ? -1 : 1;
+				object.position.y += Math.random() * (Math.random() > 0.5) ? -1 : 1;
+				object.position.z += Math.random() * (Math.random() > 0.5) ? -1 : 1;
+				room.add(object);
+				animate();
+				break;
+		}
+	});
 }
 
 function onWindowResize() {
-
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 
 	renderer.setSize(window.innerWidth, window.innerHeight);
-
 }
 
 function animate() {
-
 	renderer.setAnimationLoop(render);
-
 }
 
 function render() {
-
 	renderer.render(scene, camera);
-
 }

@@ -26,8 +26,7 @@ function calculate_angle(decoded) {
 	var coci = (2 * (dt * c) * (dt * c) * (ratio * ratio + 1));
 	var div = (ratio - 1) * (ratio - 1);
 	var r = 0.5 * Math.sqrt(coci / div);
-	console.log(r);
-	console.log(angle);
+	return [r, angle];
 }
 
 var request = new AudioFileRequest('./resources/rocket_LR.wav');
